@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import UrlShortener from './components/UrlShortner.jsx';
 import UrlStatistics from './components/UrlStatistics.jsx';
 
 function App() {
+  const [shortCode, setShortCode] = useState('');
+
   return (
     <div>
-      <UrlShortener />
-      {/* <UrlStatistics/> */}
+      <UrlShortener onShortCodeCreated={setShortCode} />
+      <UrlStatistics shortCode={shortCode} />
     </div>
   );
 }

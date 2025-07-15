@@ -49,6 +49,9 @@ const redirectUrl = async (req, res) => {
     const urlEntry = await Url.findOne({ shortCode: req.params.code });
 
     if (urlEntry && urlEntry.expiry > new Date()) {
+      urlEntry.clickCount+=1;
+      urlEntry.clickHistory.push({ timestamp: new Date(), referrer: req.get('referrer') || 'direct' });
+      await urlEntry.save();
       res.redirect(urlEntry.originalUrl);
     } else {
       res.status(404).json({ error: "Not found or expired" });
@@ -58,5 +61,23 @@ const redirectUrl = async (req, res) => {
   }
 };
 
-// ✅ Export named functions
-export { createShortUrl, redirectUrl };
+const getStatistics = async(req,res)=>{
+  try {
+    const urlEntry = await Url.findOne({ shortCode: req.params.code });
+
+    if (urlEntry) {
+      res.json({
+        originalUrl: urlEntry.originalUrl,
+        clickCount: urlEntry.clickCount,
+        clickHistory: urlEntry.clickHistory,
+      });
+    } else {
+      res.status(404).json({ error: 'URL not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error retrieving statistics' });
+  }
+}
+
+export { createShortUrl, redirectUrl,getStatistics };
+
