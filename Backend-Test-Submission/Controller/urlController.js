@@ -46,20 +46,29 @@ const createShortUrl = async (req, res) => {
 
 const redirectUrl = async (req, res) => {
   try {
-    const urlEntry = await Url.findOne({ shortCode: req.params.code });
+    const shortCode = req.params.code;
+    const urlEntry = await Url.findOne({ shortCode });
 
-    if (urlEntry && urlEntry.expiry > new Date()) {
-      urlEntry.clickCount+=1;
-      urlEntry.clickHistory.push({ timestamp: new Date(), referrer: req.get('referrer') || 'direct' });
-      await urlEntry.save();
-      res.redirect(urlEntry.originalUrl);
-    } else {
-      res.status(404).json({ error: "Not found or expired" });
+    if (!urlEntry || urlEntry.expiry < new Date()) {
+      return res.status(404).json({ error: "Not found or expired" });
     }
+
+    urlEntry.clickCount += 1;
+    urlEntry.clickHistory.push({
+      timestamp: new Date(),
+      referrer: req.get("Referrer") || "Direct",
+    });
+
+    await urlEntry.save(); 
+
+    res.redirect(urlEntry.originalUrl);
+
   } catch (error) {
-    res.status(500).json({ error: "Error finding URL" });
+    console.error("Error during redirect:", error);
+    res.status(500).json({ error: "Error redirecting to original URL" });
   }
 };
+
 
 const getStatistics = async(req,res)=>{
   try {
