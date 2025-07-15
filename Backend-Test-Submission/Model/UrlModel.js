@@ -6,4 +6,5 @@ const urlSchema = new mongoose.Schema({
     expiry:{type:Date,required:true},
 })
 
-export default URL;
+const Url = mongoose.model("Url", urlSchema);
+export default Url;

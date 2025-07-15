@@ -9,7 +9,7 @@ const UrlShortener = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/shorturls', { url, shortcode: shortCode });
+      const response = await axios.post('http://localhost:8090/shorturls', { url, shortcode: shortCode });
       setShortLink(response.data.shortLink);
     } catch (error) {
       console.error('Error creating short URL:', error);

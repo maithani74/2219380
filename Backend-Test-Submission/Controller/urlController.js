@@ -5,12 +5,25 @@ function generateUniqueCode() {
 }
 
 const createShortUrl = async (req, res) => {
-  let { url, validiy = 30, shortCode } = req.body;
+  let { url, validity = 30, shortCode } = req.body;
 
-  shortCode = shortCode || generateUniqueCode();
-  const expiryDate = new Date(Date.now() + validiy * 60 * 1000);
+  console.log("Raw URL from body:", url);
+  console.log("Type of URL:", typeof url);
+
+  if (typeof url === "object" && url !== null) {
+    url = url.url || url.link || JSON.stringify(url); 
+  }
+
+  if (!url || typeof url !== "string") {
+    return res.status(400).json({ error: "Invalid or missing URL" });
+  }
 
   try {
+    new URL(url);
+
+    shortCode = shortCode || generateUniqueCode();
+    const expiryDate = new Date(Date.now() + validity * 60 * 1000);
+
     const newUrl = new Url({
       originalUrl: url,
       shortCode,
@@ -20,13 +33,16 @@ const createShortUrl = async (req, res) => {
     await newUrl.save();
 
     res.status(201).json({
-      shortLink: `http://localhost:5000/${shortCode}`, // customize this as needed
+      shortLink: `http://localhost:8090/${shortCode}`,
       expiry: expiryDate.toISOString(),
     });
   } catch (error) {
+    console.error("Raw req.body:", req.body);
+    console.error("Error in createShortUrl:", error);
     res.status(500).json({ error: "Error creating short URL" });
   }
 };
+
 
 const redirectUrl = async (req, res) => {
   try {
